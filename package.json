@@ -1,0 +1,27 @@
+{
+  "name": "coronagraph",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack -p --config-name umd",
+    "bundle": "webpack --devtool source-map ./graph/graph.js -o graph.bundle.js",
+    "test": "webpack-dev-server --open  --config-name test"
+  },
+  "author": "bo",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.8.7",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.0.6",
+    "babel-preset-env": "^1.7.0",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  },
+  "dependencies": {
+    "cytoscape": "^3.2.0",
+    "cose-base": "^1.0.0",
+    "cytoscape-cose-bilkent": "^4.1.0"
+  }
+}
