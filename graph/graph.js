@@ -123,7 +123,6 @@ class Graph extends EventEmitter {
         this.cy.fit()
       }
       else {
-        console.log('zoom:', this.cy.zoom())
         this.cy.center()
       }
     });
@@ -254,7 +253,6 @@ class Graph extends EventEmitter {
   _handleNodeClick(event) {
     const id = event.target.data().id;
     this.emit('click', {id})
-    console.log('click to:', id)
   }
 }
 module.exports = Graph

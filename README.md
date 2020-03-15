@@ -6,7 +6,7 @@ Add this repository to dependencies of your project
 
 or
 
-Add bundle transaction.min.js from /dist to html page
+Add bundle graph.min.js from /dist to html page
 
 ## Build bundle
 
