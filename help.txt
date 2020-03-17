@@ -6,7 +6,7 @@
 let graph = new CoronaGraph('cy',myNode, settings);
 где:
     cy - id элемента где будет граф. См. /test/index.html
-    myMode - моz нода в формате {id, state, image}
+    myMode - моя нода в формате {id, state, image}
     settings - см. ниже
   graph.init(data);
   где data - начальные данные( мои потомки )
