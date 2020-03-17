@@ -5,7 +5,7 @@ const EventEmitter = require('./eventemitter')
 cytoscape.use(coseBilkent);
 //const me = "a0";
 class Graph extends EventEmitter {
-  constructor(selector, myId, settings) {
+  constructor(selector, myNode, settings) {
     super();
     this.settings = {};
     this.settings.statuses = {};
@@ -20,10 +20,9 @@ class Graph extends EventEmitter {
     }
     this._clickHandled = false;
     this.data = [];
-    //** */
     this.keyNodes = [];
     this.keys = [];
-    this.myId = myId
+    this.myNode = myNode;
     this.zoom = 0;
     this._animated = false;
     this.boundingKeys = [];
@@ -41,7 +40,8 @@ class Graph extends EventEmitter {
             'border-style': this.settings.node.borderStyle,
             'border-color': this.settings.node.borderColor,
             width: this.settings.node.width,
-            height: this.settings.node.height
+            height: this.settings.node.height,
+            'background-fit':'cover',
           }
         },
         {
@@ -59,7 +59,7 @@ class Graph extends EventEmitter {
             'border-style': this.settings.myNode.borderStyle,
             'border-color': this.settings.myNode.borderColor,
             width: this.settings.myNode.width,
-            height: this.settings.myNode.height
+            height: this.settings.myNode.height,
           }
         },
         {
@@ -159,15 +159,29 @@ class Graph extends EventEmitter {
 
     layout.run();
   }
+  _addAvatar(node){
+    if(node.image){
+      this.cy.getElementById(node.id).style('background-image', node.image)
+    }
+  }
   _build(data) {
     this.boundingKeys = [];
-    const children = data.filter(val => val.descendents.find(c => c.id == this.myId));
+    const children = data.filter(val => val.descendents.find(c => c.id == this.myNode.id));
     this.keys = data.map(v => v.id)
     let box = this.cy.extent();
     let center =
       {x: this.cy.pan().x + this.cy.width() / 2, y: this.cy.pan().y + this.cy.height() / 2}
-    const meNode = {group: "nodes", data: {id: this.myId}, position: {x: center.x, y: center.y}, classes: "me", grabbable: true}
+    const meNode = {
+      group: "nodes", 
+      data: {
+        id: this.myNode.id
+      }, 
+      position: 
+      {x: center.x, y: center.y}, 
+      classes: "me", 
+      grabbable: true}
     this.cy.add(meNode);
+    this._addAvatar(this.myNode)
     //
     let degree = 15;
     let degreStep = 360 / children.length;
@@ -181,15 +195,16 @@ class Graph extends EventEmitter {
       if (exnode.length == 0) {
         const node = {group: "nodes", data: {id: child.id}, position: {x, y}, classes: "key " + (child.state ? child.state : ''), grabbable: true}
 
-        const edge = {"data": {"id": `${this.myId}_${child.id}`, "source": this.myId, "target": child.id, "group": "edges", "classes": ""}}
+        const edge = {"data": {"id": `${this.myNode.id}_${child.id}`, "source": this.myNode.id, "target": child.id, "group": "edges", "classes": ""}}
         this.cy.add(node)
         this.cy.add(edge)
+        this._addAvatar(child)
         this.keyNodes.push({id: child.id, degree: degree})
         degree += degreStep;
         this.boundingKeys.push(child.id)
       }
     }
-    this.keyNodes.push({id: this.myId, degree: degree})
+    this.keyNodes.push({id: this.myNode.id, degree: degree})
 
     //
     for (var child of children) {
@@ -213,14 +228,15 @@ class Graph extends EventEmitter {
         if (parent.length) {
           const _node = data.find(n => n.id == key)
           const pos = parent.position();
-          const x = pos.x + h * Math.sin(degree * Math.PI / 180);
-          const y = pos.y + h * Math.cos(degree * Math.PI / 180);
+          const x =  pos.x + h * Math.sin(degree * Math.PI / 180);
+          const y =  pos.y + h * Math.cos(degree * Math.PI / 180);
           let node = {group: "nodes", data: {id: key}, position: {x, y}, classes: "key " + (_node.state ? _node.state : ''), grabbable: true}
 
           const edge = {"data": {"id": `${parentId.id}_${key}`, "source": parentId.id, "target": key, "group": "edges", "classes": ""}}
 
           this.cy.add(node)
           this.cy.add(edge)
+          this._addAvatar(_node);
           this._addChildrenToKey(n)
           degree += 35
         }
@@ -234,9 +250,9 @@ class Graph extends EventEmitter {
     for (var d of keyNode.descendents) {
       const node = this.cy.getElementById(keyNode.id)
       const exnode = this.cy.getElementById(d.id)
-      if (exnode.length == 0 && node.length && !this.keys.find(k => k == d.id) && d.id != this.myId) {
+      if (exnode.length == 0 && node.length && !this.keys.find(k => k == d.id) && d.id != this.myNode.id) {
         const pos = node.position();
-        const _node = {id: d.id, state: d.state, parentId: keyNode.id, position: {x: pos.x, y: pos.y}}
+        const _node = {id: d.id,image:d.image, state: d.state, parentId: keyNode.id, position: {x: pos.x, y: pos.y}}
         descendents.push(_node)
       }
     }
@@ -253,6 +269,7 @@ class Graph extends EventEmitter {
 
         this.cy.add(node)
         this.cy.add(edge)
+        this._addAvatar(d)
         degree += degreStep;
       }
     }

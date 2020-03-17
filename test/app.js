@@ -6,7 +6,7 @@ const _data = [
     ]
   },
   {
-    id: "a2", state:'s1', descendents: [
+    id: "a2", state:'s1',image:'images/boy-avatar.png', descendents: [
       {id: "a0", state:'s3'}, {id: "a22", state:'s1'}, {id: "a23", state:'s1'}, {id: "a24", state:'s1'}
     ]
   },
@@ -17,7 +17,7 @@ const _data = [
   },
   {
     id: "a4", descendents: [
-      {id: "a0"}, {id: "a42"}, {id: "a43"}, {id: "a44"}
+      {id: "a0"}, {id: "a42",image:'images/boy-avatar.png'}, {id: "a43"}, {id: "a44"}
     ]
   },
   {
@@ -71,6 +71,7 @@ const _data = [
     ]
   },
 ];
+const myNode = {id:'a0', state:'s1', image:'images/boy-avatar.png'}
 document.addEventListener('DOMContentLoaded', function() {
 
   const settings = {
@@ -78,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
       backgroundColor: 'red',
     }
   }
-  let graph = new CoronaGraph('cy','a0', settings);
+  let graph = new CoronaGraph('cy',myNode, settings);
   graph.on('click', (event) => console.log(event.id));
   graph.on('update', (event) => {
     const data = update(event.ids)
@@ -99,13 +100,13 @@ document.addEventListener('DOMContentLoaded', function() {
 function update(ids) {
   let result = [];
   for (let next of ids) {
-    let elem = {id: next + "0", state:'s2', descendents: []};
+    let elem = {id: next + "0", state:'s2',image:'images/boy-avatar.png', descendents: []};
     elem.descendents.push({id: next, state:'s2'});
     elem.descendents.push({id: "b" + "1", state:'s1'})
     elem.descendents.push({id: "b" + "21", state:'s1'})
     elem.descendents.push({id: elem.id + "1", state:'s1'})
 
-    elem.descendents.push({id: elem.id + "2", state:'s2'})
+    elem.descendents.push({id: elem.id + "2",image:'images/boy-avatar.png', state:'s2'})
     elem.descendents.push({id: elem.id + "3", state:'s3'})
     result.push(elem)
   }

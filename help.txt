@@ -3,10 +3,10 @@
     - по свайпу в любую сторону. Но грузятся все данные для конечных ключей, а не для ключей в направлении 
       свайпа(увы, но никак не смог это сделать.) 
 1. STARTUP
-let graph = new CoronaGraph('cy','a0', settings);
+let graph = new CoronaGraph('cy',myNode, settings);
 где:
     cy - id элемента где будет граф. См. /test/index.html
-    a0 - мой id
+    myMode - моz нода в формате {id, state, image}
     settings - см. ниже
   graph.init(data);
   где data - начальные данные( мои потомки )

@@ -12,8 +12,8 @@ const defaults = {
     //borderWidth: 4,
     //borderStyle: 'double',
     //borderColor: 'red',
-    width: 10,
-    height:10
+    width: 20,
+    height:20
   },
   edges: {
     width: 1,
