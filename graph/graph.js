@@ -5,7 +5,7 @@ const EventEmitter = require('./eventemitter')
 cytoscape.use(coseBilkent);
 //const me = "a0";
 class Graph extends EventEmitter {
-  constructor(selector,myId, settings) {
+  constructor(selector, myId, settings) {
     super();
     this.settings = {};
     this.settings.statuses = {};
@@ -177,14 +177,17 @@ class Graph extends EventEmitter {
     for (var child of children) {
       const x = center.x + h * Math.sin(degree * Math.PI / 180);
       const y = center.y + h * Math.cos(degree * Math.PI / 180);
-      const node = {group: "nodes", data: {id: child.id}, position: {x, y}, classes: "key " + (child.state ? child.state : ''), grabbable: true}
+      const exnode = this.cy.getElementById(child.id);
+      if (exnode.length == 0) {
+        const node = {group: "nodes", data: {id: child.id}, position: {x, y}, classes: "key " + (child.state ? child.state : ''), grabbable: true}
 
-      const edge = {"data": {"id": `${this.myId}_${child.id}`, "source": this.myId, "target": child.id, "group": "edges", "classes": ""}}
-      this.cy.add(node)
-      this.cy.add(edge)
-      this.keyNodes.push({id: child.id, degree: degree})
-      degree += degreStep;
-      this.boundingKeys.push(child.id)
+        const edge = {"data": {"id": `${this.myId}_${child.id}`, "source": this.myId, "target": child.id, "group": "edges", "classes": ""}}
+        this.cy.add(node)
+        this.cy.add(edge)
+        this.keyNodes.push({id: child.id, degree: degree})
+        degree += degreStep;
+        this.boundingKeys.push(child.id)
+      }
     }
     this.keyNodes.push({id: this.myId, degree: degree})
 
@@ -230,7 +233,8 @@ class Graph extends EventEmitter {
 
     for (var d of keyNode.descendents) {
       const node = this.cy.getElementById(keyNode.id)
-      if (node.length && !this.keys.find(k => k == d.id) && d.id != this.myId) {
+      const exnode = this.cy.getElementById(d.id)
+      if (exnode.length == 0 && node.length && !this.keys.find(k => k == d.id) && d.id != this.myId) {
         const pos = node.position();
         const _node = {id: d.id, state: d.state, parentId: keyNode.id, position: {x: pos.x, y: pos.y}}
         descendents.push(_node)
@@ -240,14 +244,17 @@ class Graph extends EventEmitter {
     let degreStep = 360 / descendents.length;
 
     for (var d of descendents) {
-      const x = d.position.x + h * Math.sin(degree * Math.PI / 180) / 3;
-      const y = d.position.y + h * Math.cos(degree * Math.PI / 180) / 3;
-      let node = {group: "nodes", data: {id: d.id}, position: {x, y}, classes: (d.state ? d.state : ''), grabbable: true}
-      const edge = {"data": {"id": `${keyNode.id}_${d.id}`, "source": keyNode.id, "target": d.id, "group": "edges", "classes": ''}}
+      const exnode = this.cy.getElementById(d.id)
+      if (exnode.length == 0) {
+        const x = d.position.x + h * Math.sin(degree * Math.PI / 180) / 3;
+        const y = d.position.y + h * Math.cos(degree * Math.PI / 180) / 3;
+        let node = {group: "nodes", data: {id: d.id}, position: {x, y}, classes: (d.state ? d.state : ''), grabbable: true}
+        const edge = {"data": {"id": `${keyNode.id}_${d.id}`, "source": keyNode.id, "target": d.id, "group": "edges", "classes": ''}}
 
-      this.cy.add(node)
-      this.cy.add(edge)
-      degree += degreStep;
+        this.cy.add(node)
+        this.cy.add(edge)
+        degree += degreStep;
+      }
     }
   }
   _handleNodeClick(event) {

@@ -12,7 +12,7 @@ const _data = [
   },
   {
     id: "a3", state:'s1', descendents: [
-      {id: "a0"}, {id: "a32"}, {id: "a33"}, {id: "a34"}
+      {id: "a0"}, {id: "a32"}, {id: "a33"}, {id: "a33"}, {id: "a23"}, {id: "a23"}, {id: "a34"}
     ]
   },
   {
@@ -43,6 +43,11 @@ const _data = [
   {
     id: "a9", descendents: [
       {id: "a0"}, {id: "a92"}, {id: "a93"}, {id: "a94"}, {id: "a95"}
+    ]
+  },
+  {
+    id: "b1", descendents: [
+      {id: "a0"}, {id: "b11"}, {id: "b12"}, {id: "b14"}, {id: "b15"}
     ]
   },
   {
@@ -96,7 +101,10 @@ function update(ids) {
   for (let next of ids) {
     let elem = {id: next + "0", state:'s2', descendents: []};
     elem.descendents.push({id: next, state:'s2'});
+    elem.descendents.push({id: "b" + "1", state:'s1'})
+    elem.descendents.push({id: "b" + "21", state:'s1'})
     elem.descendents.push({id: elem.id + "1", state:'s1'})
+
     elem.descendents.push({id: elem.id + "2", state:'s2'})
     elem.descendents.push({id: elem.id + "3", state:'s3'})
     result.push(elem)
