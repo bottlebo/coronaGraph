@@ -83,16 +83,28 @@ const CoronaGraph = require('../');
 const myNode = 
 {
   //"id": "81ecb964edf86162d17f298665c8f4110536ab00", "state": null}
-id: 'a0', state: 's1', image: 'images/boy-avatar.png'}
+id: 'a0', state: 's10', image: 'images/boy-avatar.png'}
 document.addEventListener('DOMContentLoaded', function() {
 
   const settings = {
     myNode: {
       backgroundColor: 'red',
+    },
+    statuses: {
+      's10': {
+        style: {
+          borderWidth: 2,
+          borderStyle: 'double',
+          borderColor: 'blue',
+        }
+      }
     }
   }
   let graph = new CoronaGraph('cy', myNode, settings);
-  graph.on('click', (event) => console.log(event.id));
+  graph.on('click', (event) => {
+    graph.addAvatar({id:event.id, image:'images/boy-avatar.png'})
+    console.log(event.id)
+  });
   graph.on('update', (event) => {
     console.log(event.ids)
     const data = update(event.ids)

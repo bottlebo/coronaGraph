@@ -18,6 +18,11 @@ class Graph extends EventEmitter {
     for (const st of Object.keys(_defaults.statuses)) {
       this.settings.statuses[st] = settings.statuses ? (settings.statuses[st] || _defaults.statuses[st]) : _defaults.statuses[st];
     }
+    if (settings.statuses) {
+      for (const st of Object.keys(settings.statuses)) {
+        this.settings.statuses[st] = settings.statuses[st];
+      }
+    }
     this._clickHandled = false;
     this.data = [];
     this.keyNodes = [];
@@ -44,6 +49,13 @@ class Graph extends EventEmitter {
             width: this.settings.node.width,
             height: this.settings.node.height,
             'background-fit': 'cover',
+
+          }
+        },
+        {
+          selector: '.active',
+          style: {
+            'shape': 'round-heptagon'
           }
         },
         {
@@ -103,7 +115,6 @@ class Graph extends EventEmitter {
 
     layout.run();
     this.cy.on('click tap', 'node', (event) => {
-      console.log('tap')
       event.preventDefault();
       event.stopPropagation();
       if (event.type == 'click') {
@@ -151,7 +162,7 @@ class Graph extends EventEmitter {
   _zoom() {
     this._zoomStarted = false
     if (this.cy.zoom() < this.zoom) {
-      
+
       this.zoom = this.cy.zoom()
       this.emit('update', {ids: this.boundingKeys})
     }
@@ -183,6 +194,11 @@ class Graph extends EventEmitter {
 
     layout.run();
   }
+  addAvatar(node) {
+    const n = this.cy.getElementById(node.id)
+    if (n.length)
+      this._addAvatar(node)
+  }
   _addAvatar(node) {
     if (node.image) {
       this.cy.getElementById(node.id).style('background-image', node.image)
@@ -204,7 +220,7 @@ class Graph extends EventEmitter {
       },
       position:
         {x: center.x, y: center.y},
-      classes: "me",
+      classes: "me " + (this.myNode.state ? this.myNode.state : ''),
       grabbable: true
     }
     this.cy.add(meNode);
@@ -302,8 +318,18 @@ class Graph extends EventEmitter {
       }
     }
   }
+  clearActive() {
+    const active = this.cy.$('.active');
+    if (active.length) {
+      active.removeClass('active')
+    }
+  }
   _handleNodeClick(event) {
-    const id = event.target.data().id;
+    const elem = event.target;
+    const id = elem.data().id;
+    this.clearActive();
+    elem.addClass('active')
+
     this.emit('click', {id})
   }
 }

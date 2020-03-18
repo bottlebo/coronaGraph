@@ -1,9 +1,9 @@
 const defaults = {
   myNode: {
     backgroundColor: 'green',
-    borderWidth: 4,
-    borderStyle: 'double',
-    borderColor: 'red',
+    //borderWidth: 4,
+    // borderStyle: 'double',
+    // borderColor: 'red',
     width: 55,
     height:55
   },
@@ -13,7 +13,7 @@ const defaults = {
     //borderStyle: 'double',
     //borderColor: 'red',
     width: 20,
-    height:20
+    height:20,
   },
   edges: {
     width: 1,
