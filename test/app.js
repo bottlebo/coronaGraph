@@ -1,5 +1,5 @@
 const CoronaGraph = require('../');
-const _data = [
+ const _data = [
   {
     id: "a1", state:'s1', descendents: [
       {id: "a0", state:'s1'}, {id: "a12", state:'s1'}, {id: "a13", state:'s2'}, {id: "a14", state:'s3'}
@@ -71,7 +71,19 @@ const _data = [
     ]
   },
 ];
-const myNode = {id:'a0', state:'s1', image:'images/boy-avatar.png'}
+// const _data = [{
+//   "id": "9881bd6d16158bd56e9b8d6108640903aacf58a7", "state": null,
+//   "descendents": [
+//   {"id": "81ecb964edf86162d17f298665c8f4110536ab00"}, 
+//   {"id": "1bc748c2243e7e0301bb945b2b0da9a57402593c", "state": null}, 
+//   {"id": "3f73f6d3103e3df706f9b954d59616f5b9e57e26", "state": null}, 
+//   {"id": "3f73f6d3103e3df706f9b954d59616f5b9e57e26", "state": null}, 
+//   {"id": "4683451206d28aa0c2d8aa8914abcddaf0ea027d", "state": null}]
+// }]
+const myNode = 
+{
+  //"id": "81ecb964edf86162d17f298665c8f4110536ab00", "state": null}
+id: 'a0', state: 's1', image: 'images/boy-avatar.png'}
 document.addEventListener('DOMContentLoaded', function() {
 
   const settings = {
@@ -79,9 +91,10 @@ document.addEventListener('DOMContentLoaded', function() {
       backgroundColor: 'red',
     }
   }
-  let graph = new CoronaGraph('cy',myNode, settings);
+  let graph = new CoronaGraph('cy', myNode, settings);
   graph.on('click', (event) => console.log(event.id));
   graph.on('update', (event) => {
+    console.log(event.ids)
     const data = update(event.ids)
     graph.add(data);
   })
@@ -98,16 +111,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 function update(ids) {
-  let result = [];
-  for (let next of ids) {
-    let elem = {id: next + "0", state:'s2',image:'images/boy-avatar.png', descendents: []};
-    elem.descendents.push({id: next, state:'s2'});
-    elem.descendents.push({id: "b" + "1", state:'s1'})
-    elem.descendents.push({id: "b" + "21", state:'s1'})
-    elem.descendents.push({id: elem.id + "1", state:'s1'})
+  let result = 
+   /*
+   [
+   {"id":"9881bd6d16158bd56e9b8d6108640903aacf58a7","state":null,
+    "descendents":[
+      {"id":"1bc748c2243e7e0301bb945b2b0da9a57402593c","state":null}
+    ]
+  },
+    {"id":"81ecb964edf86162d17f298665c8f4110536ab00","state":1,"descendents":[{"id":"9881bd6d16158bd56e9b8d6108640903aacf58a7","state":1}]},
+    
+    {"id":"3f73f6d3103e3df706f9b954d59616f5b9e57e26","state":null,
+      "descendents":[
+        {"id":"34564061db7cdab49fd589435313747b27558105","state":null},
 
-    elem.descendents.push({id: elem.id + "2",image:'images/boy-avatar.png', state:'s2'})
-    elem.descendents.push({id: elem.id + "3", state:'s3'})
+        {"id":"9881bd6d16158bd56e9b8d6108640903aacf58a7","state":null},
+        {"id":"9881bd6d16158bd56e9b8d6108640903aacf58a7","state":null},
+      ]},
+    {"id":"4683451206d28aa0c2d8aa8914abcddaf0ea027d","state":null,
+      "descendents":[
+        {"id":"9881bd6d16158bd56e9b8d6108640903aacf58a7","state":null},
+        {"id":"9881bd6d16158bd56e9b8d6108640903aacf58a8","state":null}
+      ]}
+    ] */
+  [];
+  for (let next of ids) {
+    let elem = {id: next + "0", state: 's2', image: 'images/boy-avatar.png', descendents: []};
+    elem.descendents.push({id: next, state: 's2'});
+    elem.descendents.push({id: "b" + "1", state: 's1'})
+    elem.descendents.push({id: "b" + "21", state: 's1'})
+    elem.descendents.push({id: elem.id + "1", state: 's1'})
+
+    elem.descendents.push({id: elem.id + "2", image: 'images/boy-avatar.png', state: 's2'})
+    elem.descendents.push({id: elem.id + "3", state: 's3'})
     result.push(elem)
   }
   return result;

@@ -24,7 +24,9 @@ class Graph extends EventEmitter {
     this.keys = [];
     this.myNode = myNode;
     this.zoom = 0;
+    this._zoomStarted = false;
     this._animated = false;
+    this._pan = {};
     this.boundingKeys = [];
     this.cy = cytoscape({
       container: document.getElementById(selector),
@@ -41,7 +43,7 @@ class Graph extends EventEmitter {
             'border-color': this.settings.node.borderColor,
             width: this.settings.node.width,
             height: this.settings.node.height,
-            'background-fit':'cover',
+            'background-fit': 'cover',
           }
         },
         {
@@ -83,6 +85,7 @@ class Graph extends EventEmitter {
       this.cy.style().selector('.' + st).style(this.settings.statuses[st].style).update();
     }
   }
+
   init(data) {
     this.emit('busy');
     this.data.length = 0;
@@ -100,6 +103,7 @@ class Graph extends EventEmitter {
 
     layout.run();
     this.cy.on('click tap', 'node', (event) => {
+      console.log('tap')
       event.preventDefault();
       event.stopPropagation();
       if (event.type == 'click') {
@@ -115,28 +119,48 @@ class Graph extends EventEmitter {
     })
     this.cy.on('zoom', (evt) => {
       if (this._animated) return
-      if (this.cy.zoom() < this.zoom) {
-        this.zoom = this.cy.zoom()
-        this.emit('update', {ids: this.boundingKeys})
-      }
-      if (this.cy.zoom() <= this.cy.minZoom()) {
-        this.cy.fit()
+      this._zoomStarted = true
+      setTimeout(() => {
+        if (this._zoomStarted) {
+          this._zoom();
+        }
+      }, 500)
+    });
+    this.cy.on('tapstart', evt => {
+      this._pan = {x: this.cy.pan().x, y: this.cy.pan().y};
+    })
+    this.cy.on('tapend', evt => {
+      if (this._zoomStarted) {
+        this._zoom();
       }
       else {
-        this.cy.center()
-      }
-    });
-    this.cy.on('tapend', evt => {
-      if (this._animated) return
-
-      if (this.cy.width() - this.cy.nodes().renderedBoundingBox().x2 > 100 ||
-        this.cy.nodes().renderedBoundingBox().x1 > 100 ||
-        this.cy.nodes().renderedBoundingBox().y1 > 100 ||
-        this.cy.height() - this.cy.nodes().renderedBoundingBox().y2 > 100
-      ) {
-        this.emit('update', {ids: this.boundingKeys})
+        if (this._animated || (evt.target.length && evt.target[0].data().id)) return
+        const _pan = this.cy.pan();
+        if (
+          Math.abs(_pan.x - this._pan.x) > 10 || Math.abs(_pan.y - this._pan.y > 10) &&
+          (this.cy.width() - this.cy.nodes().renderedBoundingBox().x2 > 100 ||
+            this.cy.nodes().renderedBoundingBox().x1 > 100 ||
+            this.cy.nodes().renderedBoundingBox().y1 > 100 ||
+            this.cy.height() - this.cy.nodes().renderedBoundingBox().y2 > 100)
+        ) {
+          this.emit('update', {ids: this.boundingKeys})
+        }
       }
     })
+  }
+  _zoom() {
+    this._zoomStarted = false
+    if (this.cy.zoom() < this.zoom) {
+      
+      this.zoom = this.cy.zoom()
+      this.emit('update', {ids: this.boundingKeys})
+    }
+    if (this.cy.zoom() <= this.cy.minZoom()) {
+      this.cy.fit()
+    }
+    else {
+      this.cy.center()
+    }
   }
   add(data) {
     this.emit('busy');
@@ -159,27 +183,30 @@ class Graph extends EventEmitter {
 
     layout.run();
   }
-  _addAvatar(node){
-    if(node.image){
+  _addAvatar(node) {
+    if (node.image) {
       this.cy.getElementById(node.id).style('background-image', node.image)
     }
   }
   _build(data) {
     this.boundingKeys = [];
     const children = data.filter(val => val.descendents.find(c => c.id == this.myNode.id));
-    this.keys = data.map(v => v.id)
+    this.keys = [];// data.map(v => v.id)
+    for (const d of data) {
+      if (!this.keys.includes(d.id)) this.keys.push(d.id)
+    }
     let box = this.cy.extent();
-    let center =
-      {x: this.cy.pan().x + this.cy.width() / 2, y: this.cy.pan().y + this.cy.height() / 2}
+    let center = {x: this.cy.pan().x + this.cy.width() / 2, y: this.cy.pan().y + this.cy.height() / 2}
     const meNode = {
-      group: "nodes", 
+      group: "nodes",
       data: {
         id: this.myNode.id
-      }, 
-      position: 
-      {x: center.x, y: center.y}, 
-      classes: "me", 
-      grabbable: true}
+      },
+      position:
+        {x: center.x, y: center.y},
+      classes: "me",
+      grabbable: true
+    }
     this.cy.add(meNode);
     this._addAvatar(this.myNode)
     //
@@ -213,6 +240,7 @@ class Graph extends EventEmitter {
     }
     degree = 30;
     for (var key of this.keys) {
+
       const node = this.cy.getElementById(key)
       if (!node.length) {
         const n = data.find(k => k.id == key)
@@ -228,8 +256,8 @@ class Graph extends EventEmitter {
         if (parent.length) {
           const _node = data.find(n => n.id == key)
           const pos = parent.position();
-          const x =  pos.x + h * Math.sin(degree * Math.PI / 180);
-          const y =  pos.y + h * Math.cos(degree * Math.PI / 180);
+          const x = pos.x + h * Math.sin(degree * Math.PI / 180);
+          const y = pos.y + h * Math.cos(degree * Math.PI / 180);
           let node = {group: "nodes", data: {id: key}, position: {x, y}, classes: "key " + (_node.state ? _node.state : ''), grabbable: true}
 
           const edge = {"data": {"id": `${parentId.id}_${key}`, "source": parentId.id, "target": key, "group": "edges", "classes": ""}}
@@ -252,7 +280,7 @@ class Graph extends EventEmitter {
       const exnode = this.cy.getElementById(d.id)
       if (exnode.length == 0 && node.length && !this.keys.find(k => k == d.id) && d.id != this.myNode.id) {
         const pos = node.position();
-        const _node = {id: d.id,image:d.image, state: d.state, parentId: keyNode.id, position: {x: pos.x, y: pos.y}}
+        const _node = {id: d.id, image: d.image, state: d.state, parentId: keyNode.id, position: {x: pos.x, y: pos.y}}
         descendents.push(_node)
       }
     }
