@@ -164,7 +164,7 @@ class Graph extends EventEmitter {
       this.cy.fit()
     }
     else {
-      this.cy.center()
+      //this.cy.center()
     }
 
   }
