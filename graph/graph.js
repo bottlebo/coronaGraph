@@ -129,40 +129,34 @@ class Graph extends EventEmitter {
       }
     })
     this.cy.on('zoom', (evt) => {
-      if (this._animated) return
+      if (this._animated || this._zoomStarted) return
       this._zoomStarted = true
       setTimeout(() => {
-        if (this._zoomStarted) {
-          this._zoom();
-        }
-      }, 500)
+        this._zoom()
+      }, 500);
+      setTimeout(() => {
+        this._zoomStarted = false
+      }, 1000)
     });
     this.cy.on('tapstart', evt => {
       this._pan = {x: this.cy.pan().x, y: this.cy.pan().y};
     })
     this.cy.on('tapend', evt => {
-      if (this._zoomStarted) {
-        this._zoom();
-      }
-      else {
-        if (this._animated || (evt.target.length && evt.target[0].data().id)) return
-        const _pan = this.cy.pan();
-        if (
-          Math.abs(_pan.x - this._pan.x) > 10 || Math.abs(_pan.y - this._pan.y > 10) &&
-          (this.cy.width() - this.cy.nodes().renderedBoundingBox().x2 > 100 ||
-            this.cy.nodes().renderedBoundingBox().x1 > 100 ||
-            this.cy.nodes().renderedBoundingBox().y1 > 100 ||
-            this.cy.height() - this.cy.nodes().renderedBoundingBox().y2 > 100)
-        ) {
-          this.emit('update', {ids: this.boundingKeys})
-        }
+      if (this._animated || (evt.target.length && evt.target[0].data().id)) return
+      const _pan = this.cy.pan();
+      if (
+        Math.abs(_pan.x - this._pan.x) > 10 || Math.abs(_pan.y - this._pan.y > 10) &&
+        (this.cy.width() - this.cy.nodes().renderedBoundingBox().x2 > 100 ||
+          this.cy.nodes().renderedBoundingBox().x1 > 100 ||
+          this.cy.nodes().renderedBoundingBox().y1 > 100 ||
+          this.cy.height() - this.cy.nodes().renderedBoundingBox().y2 > 100)
+      ) {
+        this.emit('update', {ids: this.boundingKeys})
       }
     })
   }
   _zoom() {
-    this._zoomStarted = false
     if (this.cy.zoom() < this.zoom) {
-
       this.zoom = this.cy.zoom()
       this.emit('update', {ids: this.boundingKeys})
     }
@@ -172,6 +166,7 @@ class Graph extends EventEmitter {
     else {
       this.cy.center()
     }
+
   }
   add(data) {
     this.emit('busy');
