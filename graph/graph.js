@@ -159,13 +159,14 @@ class Graph extends EventEmitter {
     if (this.cy.zoom() < this.zoom) {
       this.zoom = this.cy.zoom()
       this.emit('update', {ids: this.boundingKeys})
+      this.cy.center()
     }
     if (this.cy.zoom() <= this.cy.minZoom()) {
       this.cy.fit()
     }
-    else {
-      //this.cy.center()
-    }
+    // else {
+    //   //this.cy.center()
+    // }
 
   }
   add(data) {
