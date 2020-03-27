@@ -256,8 +256,8 @@ class Graph extends EventEmitter {
       const node = this.cy.getElementById(key)
       if (!node.length) {
         const n = data.find(k => k.id == key)
-
         const parentId = n.descendents.filter(value => -1 !== this.keys.indexOf(value.id))[0]
+        if(parentId) {
         const parent = this.cy.getElementById(parentId.id)
         this.boundingKeys.push(n.id)
         const index = this.boundingKeys.indexOf(parentId.id);
@@ -280,6 +280,8 @@ class Graph extends EventEmitter {
           this._addChildrenToKey(n)
           degree += 35
         }
+      }
+        //
       }
     }
   }
