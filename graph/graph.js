@@ -11,8 +11,10 @@ class Graph extends EventEmitter {
     this.settings.statuses = {};
     this.settings.myNode = Object.assign({}, _defaults.myNode, settings.myNode);
     this.settings.edges = Object.assign({}, _defaults.edges, settings.edges)
-    this.settings.keyNode = Object.assign({}, _defaults.keyNode, settings.keyNode)
+    this.settings.keyNode = Object.assign({}, _defaults.keyNode, settings.keyNode)//question
     this.settings.node = Object.assign({}, _defaults.node, settings.node)
+    this.question = settings.question;
+    this.settings.questionNode = Object.assign({}, _defaults.questionNode, settings.questionNode)//
 
 
     for (const st of Object.keys(_defaults.statuses)) {
@@ -85,6 +87,24 @@ class Graph extends EventEmitter {
             'border-color': this.settings.keyNode.borderColor,
             width: this.settings.keyNode.width,
             height: this.settings.keyNode.height
+          }
+        },
+        {
+          selector: '.question',
+          style: {
+            content: "?",
+            'background-color': this.settings.questionNode.backgroundColor,
+            'border-width': this.settings.questionNode.borderWidth,
+            'border-style': this.settings.questionNode.borderStyle,
+            'border-color': this.settings.questionNode.borderColor,
+            width: this.settings.questionNode.width,
+            height: this.settings.questionNode.height,
+            'text-halign': 'center',
+            'text-valign': 'center',
+            'color': this.settings.questionNode.color,
+            'font-size': this.settings.questionNode.fontSize,
+            'font-weight': this.settings.questionNode.fontWeight,
+
           }
         },
       ],
@@ -196,9 +216,24 @@ class Graph extends EventEmitter {
       this._addAvatar(node)
   }
   _addAvatar(node) {
-    if (node.image) {
-      this.cy.getElementById(node.id).style('background-image', node.image)
+    if (node.photoUrl) {
+      this.cy.getElementById(node.id).style('background-image', node.photoUrl)
     }
+  }
+  _addQuestionNode() {
+    const qnode = {
+      group: "nodes",
+      data: {
+        id: 'question'
+      },
+      position:
+        {x: 0, y: 0},
+      classes: "question ",
+      grabbable: true
+    }
+    const qedge = {"data": {"id": `${this.myNode.id}_question`, "source": this.myNode.id, "target": 'question', "group": "edges", "classes": ""}}
+    this.cy.add(qnode)
+    this.cy.add(qedge)
   }
   _build(data) {
     this.boundingKeys = [];
@@ -221,6 +256,9 @@ class Graph extends EventEmitter {
     }
     this.cy.add(meNode);
     this._addAvatar(this.myNode)
+    //
+    if (this.question)
+      this._addQuestionNode();
     //
     let degree = 15;
     let degreStep = 360 / children.length;
@@ -257,30 +295,30 @@ class Graph extends EventEmitter {
       if (!node.length) {
         const n = data.find(k => k.id == key)
         const parentId = n.descendents.filter(value => -1 !== this.keys.indexOf(value.id))[0]
-        if(parentId) {
-        const parent = this.cy.getElementById(parentId.id)
-        this.boundingKeys.push(n.id)
-        const index = this.boundingKeys.indexOf(parentId.id);
-        if (index > -1) {
-          this.boundingKeys.splice(index, 1);
+        if (parentId) {
+          const parent = this.cy.getElementById(parentId.id)
+          this.boundingKeys.push(n.id)
+          const index = this.boundingKeys.indexOf(parentId.id);
+          if (index > -1) {
+            this.boundingKeys.splice(index, 1);
+          }
+
+          if (parent.length) {
+            const _node = data.find(n => n.id == key)
+            const pos = parent.position();
+            const x = pos.x + h * Math.sin(degree * Math.PI / 180);
+            const y = pos.y + h * Math.cos(degree * Math.PI / 180);
+            let node = {group: "nodes", data: {id: key}, position: {x, y}, classes: "key " + (_node.state ? _node.state : ''), grabbable: true}
+
+            const edge = {"data": {"id": `${parentId.id}_${key}`, "source": parentId.id, "target": key, "group": "edges", "classes": ""}}
+
+            this.cy.add(node)
+            this.cy.add(edge)
+            this._addAvatar(_node);
+            this._addChildrenToKey(n)
+            degree += 35
+          }
         }
-
-        if (parent.length) {
-          const _node = data.find(n => n.id == key)
-          const pos = parent.position();
-          const x = pos.x + h * Math.sin(degree * Math.PI / 180);
-          const y = pos.y + h * Math.cos(degree * Math.PI / 180);
-          let node = {group: "nodes", data: {id: key}, position: {x, y}, classes: "key " + (_node.state ? _node.state : ''), grabbable: true}
-
-          const edge = {"data": {"id": `${parentId.id}_${key}`, "source": parentId.id, "target": key, "group": "edges", "classes": ""}}
-
-          this.cy.add(node)
-          this.cy.add(edge)
-          this._addAvatar(_node);
-          this._addChildrenToKey(n)
-          degree += 35
-        }
-      }
         //
       }
     }
@@ -294,7 +332,7 @@ class Graph extends EventEmitter {
       const exnode = this.cy.getElementById(d.id)
       if (exnode.length == 0 && node.length && !this.keys.find(k => k == d.id) && d.id != this.myNode.id) {
         const pos = node.position();
-        const _node = {id: d.id, image: d.image, state: d.state, parentId: keyNode.id, position: {x: pos.x, y: pos.y}}
+        const _node = {id: d.id, photoUrl: d.photoUrl, state: d.state, parentId: keyNode.id, position: {x: pos.x, y: pos.y}}
         descendents.push(_node)
       }
     }
@@ -325,10 +363,14 @@ class Graph extends EventEmitter {
   _handleNodeClick(event) {
     const elem = event.target;
     const id = elem.data().id;
-    this.clearActive();
-    elem.addClass('active')
-
-    this.emit('click', {id})
+    if (id == 'question') {
+      this.emit('question')
+    }
+    else {
+      this.clearActive();
+      elem.addClass('active')
+      this.emit('click', {id})
+    }
   }
 }
 module.exports = Graph

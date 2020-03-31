@@ -15,6 +15,17 @@ const defaults = {
     width: 20,
     height:20,
   },
+  questionNode: {
+    backgroundColor: 'red',
+    borderWidth: 0,
+    borderStyle: 'double',
+    borderColor: 'red',
+    width: 35,
+    height:35,
+    color:'white',
+    fontSize: '16px',
+    fontWeight: 'bold'
+  },
   edges: {
     width: 1,
     lineColor: '#555'
